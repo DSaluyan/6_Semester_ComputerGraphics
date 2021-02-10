@@ -2,12 +2,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def plot_contour(points, params=None):
+def plot_contour(points, ax, params=None):
     if params is None:
         params = {}
-    plt.plot(np.append(points[:, 0], [points[0, 0]]),
-             np.append(points[:, 1], [points[0, 1]]),
-             **params)
+    ax.plot(np.append(points[:, 0], [points[0, 0]]),
+            np.append(points[:, 1], [points[0, 1]]),
+            **params)
 
 
 def main():
@@ -16,8 +16,8 @@ def main():
                        for i in range(1, int(input('Введите количество точек: ')) + 1)])
 
     # plotting
-    plt.figure(1)
-    plot_contour(points)
+    fig, ax = plt.subplots()
+    plot_contour(points, ax)
 
     # transformation matrix
     T = np.array([[1, 0], [0, 1]])
@@ -25,7 +25,7 @@ def main():
     points = np.dot(points, T)
 
     # plotting again
-    plot_contour(points)
+    plot_contour(points, ax)
     plt.title("Отображение фигуры")
     plt.show()
 
