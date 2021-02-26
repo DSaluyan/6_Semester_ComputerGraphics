@@ -33,12 +33,6 @@ def my_dot(lhs, rhs):
         return answer
 
 
-def test():
-    a = [[1, 2], [3, 4], [0, 5]]
-    b = [[1, 2, 3, 4], [5, 6, 7, 8]]
-    print(my_dot(a, b))
-
-
 def plot3d_contour(points, ax, contour=True, **params):
     if params is None:
         params = {}
@@ -81,7 +75,7 @@ def main():
     max_coord = max(max2d(points), max2d(turned_points))
 
     # plotting again
-    plot3d_contour(turned_points, ax)  # здесь проблема
+    plot3d_contour(turned_points, ax)
     plt.title("Поворот фигуры")
     ax.legend(['Исходная фигура', 'Повёрнутая фигура'])
     ax.set_xlim3d([-max_coord, max_coord])
