@@ -1,110 +1,91 @@
 import matplotlib.pyplot as plt
-import numpy as np
-import numpy.linalg as linalg
+from math import cos, sin, radians
 
 
-def plot_contour(points, ax, params=None):
+def max2d(obj):
+    result = max(obj[0])
+    for row in obj:
+        if max(row) > result:
+            result = max(row)
+    return result
+
+
+def my_dot(lhs, rhs):
+    if len(lhs) == 0:
+        raise IndexError
+    elif len(rhs) == 0:
+        raise IndexError
+    elif len(lhs[0]) == 0:
+        raise IndexError
+    elif len(rhs[0]) == 0:
+        raise IndexError
+    else:
+        for row in lhs:
+            if len(row) != len(lhs[0]) or len(row) != len(rhs):
+                raise IndexError
+        for row in rhs:
+            if len(row) != len(rhs[0]):
+                raise IndexError
+        answer = [[sum([lhs[m][current] * rhs[current][n]
+                        for current in range(0, len(rhs))])
+                   for n in range(0, len(rhs[0]))]
+                  for m in range(0, len(lhs))]
+        return answer
+
+
+def plot3d_contour(points, ax, contour=True, **params):
     if params is None:
         params = {}
-    ax.plot(np.append(points[:, 0], [points[0, 0]]),
-            np.append(points[:, 1], [points[0, 1]]),
-            **params)
+    x = [points[i][0] for i in range(0, len(points))]
+    y = [points[i][1] for i in range(0, len(points))]
+    z = [points[i][2] for i in range(0, len(points))]
+    if contour:
+        ax.plot3D([*x, points[0][0]],
+                  [*y, points[0][1]],
+                  [*z, points[0][2]],
+                  **params)
+    else:
+        ax.plot3D(x, y, z, **params)
 
 
 def main():
-    print("__________________пункт первый__________________")
+    print("__________________пункт пятый__________________")
     # input points
-    points = np.array([[float(elem) for elem in input(f'Введите точку фигуры {i}: ').split(',')]
-                       for i in range(1, int(input('Введите количество точек: ')) + 1)])
+    points = [[float(elem) for elem in input(f'Введите точку фигуры {i}: ').split(',')]
+              for i in range(1, int(input('Введите количество точек: ')) + 1)]
     # plotting
-    fig, ax = plt.subplots()
-    plot_contour(points, ax)
+    fig = plt.figure()
+    ax = plt.axes(projection='3d')
+    plot3d_contour(points, ax)
 
     # transformation matrix
-    scale = float(input('Введите масштаб: '))
-    x_mirror = bool(input('Отразить относительно оси X? (1 - Да/ 0 - нет)'))
-    y_mirror = bool(input('Отразить относительно оси Y? (1 - Да/ 0 - нет)'))
-    T = np.array([[scale*int(-1 if x_mirror else 1), 0], [0, scale*int(-1 if y_mirror else 1)]])
-    points = np.dot(points, T)
-    
+    turn_x = radians(float(input('Введите угол поворота относительно оси Х в градусах: ')))
+    turn_y = radians(float(input('Введите угол поворота относительно оси Y в градусах: ')))
+    turn_z = radians(float(input('Введите угол поворота относительно оси Z в градусах: ')))
+    turn_x_matrix = [[1, 0, 0],
+                     [0, cos(turn_x), -sin(turn_x)],
+                     [0, sin(turn_x), cos(turn_x)]]
+    turn_y_matrix = [[cos(turn_y), 0, sin(turn_y)],
+                     [0, 1, 0],
+                     [-sin(turn_y), 0, cos(turn_y)]]
+    turn_z_matrix = [[cos(turn_z), -sin(turn_z), 0],
+                     [sin(turn_z), cos(turn_z), 0],
+                     [0, 0, 1]]
+    turned_points = my_dot(my_dot(my_dot(points, turn_x_matrix), turn_y_matrix), turn_z_matrix)
+    max_coord = max(max2d(points), max2d(turned_points))
+
     # plotting again
-    plot_contour(points, ax)
-    plt.title("Отражение фигуры")
-    ax.legend(['Исходная фигура','Отраженная фигура'])
-    plt.axis('equal')
+    plot3d_contour(turned_points, ax)
+    plot3d_contour([[0, 0, 0], [max_coord, 0, 0]], ax, False)
+    plot3d_contour([[0, 0, 0], [0, max_coord, 0]], ax, False)
+    plot3d_contour([[0, 0, 0], [0, 0, max_coord]], ax, False)
+    plt.title("Поворот фигуры")
+    ax.legend([ 'Исходная фигура', 'Повёрнутая фигура', 'Ось X', 'Ось Y', 'Ось Z'])
+    ax.set_xlim3d([-max_coord, max_coord])
+    ax.set_ylim3d([-max_coord, max_coord])
+    ax.set_zlim3d([-max_coord, max_coord])
     plt.show()
-    
-    print("__________________пункт второй__________________")
-    line = np.array([[float(elem) for elem in input(f'Введите точку прямой {i}: ').split(',')]
-                       for i in range(1, 3)])
-    points = np.array([[float(elem) for elem in input(f'Введите точку фигуры {i}: ').split(',')]+[1]
-                       for i in range(1, int(input('Введите количество точек: ')) + 1)])
-    while(True):
-        # plotting original figure
-        fig, ax = plt.subplots()
-        
-        plot_contour(line, ax)
-        plot_contour(points[:, 0:2], ax)
 
-        # transformation matrixes
-        try:
-            turn_value = -np.arctan((line[0][1] - line[1][1])/(line[0][0] - line[1][0])) 
-        except:
-            turn_value = -np.arctan(inf)
-        move_matrix = np.array([[1, 0, 0], [0, 1, 0], [-line[0][0], -line[0][1], 1]])
-        turn_matrix = np.array([[np.cos(turn_value), np.sin(turn_value), 0],
-                                [-np.sin(turn_value), np.cos(turn_value), 0],
-                                [0, 0, 1]])
-        mirror_matrix = np.array([[1, 0, 0], [0, -1, 0], [0, 0, 1]])
-        mirrored_points = points.dot(move_matrix).dot(turn_matrix).dot(mirror_matrix).\
-                                 dot(linalg.inv(turn_matrix)).dot(linalg.inv(move_matrix))
-    
-        # plotting mirrored figure
-        plot_contour(mirrored_points[:,0:2], ax)
-        plt.title('Отражение фигуры относительно прямой')
-        ax.legend(['Линия', 'Исходная фигура','Отраженная фигура'])
-        plt.axis('equal')
-        plt.show()
-        print('Выберите действие: \n1 - изменить прямую \n2 - перейти к третьему пункту \n> ', end='')
-        ch = int(input());
-        if ch == 1:
-            line = np.array([[float(elem) for elem in input(f'Введите точку прямой {i}: ').split(',')]
-                       for i in range(1, 3)])
-        elif ch == 2:
-            break
 
-    print('__________________пункт третий__________________')
-    turning_point = np.array([[float(elem) for elem in input(f'Введите координаты точки: ').split(',')]])
-    points = np.array([[float(elem) for elem in input(f'Введите точку фигуры {i}: ').split(',')]+[1]
-                       for i in range(1, int(input('Введите количество точек: ')) + 1)])
-    turn_value = np.radians(float(input('Введите угол в градусах: ')))
-    while(True):
-        # plotting original figure
-        fig, ax = plt.subplots()
-        
-        plot_contour(turning_point, ax)
-        plot_contour(points[:, 0:2], ax)
-
-        # transformation matrixes
-        move_matrix = np.array([[1, 0, 0], [0, 1, 0], [-turning_point[0][0], -turning_point[0][1], 1]])
-        turn_matrix = np.array([[np.cos(turn_value), np.sin(turn_value), 0],
-                                [-np.sin(turn_value), np.cos(turn_value), 0],
-                                [0, 0, 1]])
-        turned_points = points.dot(move_matrix).dot(turn_matrix).dot(linalg.inv(move_matrix))
-    
-        # plotting turned figure
-        plot_contour(turned_points[:,0:2], ax)
-        plt.title('Отражение фигуры относительно прямой')
-        ax.legend(['Точка', 'Исходная фигура','Повернутая фигура'])
-        plt.axis('equal')
-        plt.show()
-        print('Выберите действие: \n1 - изменить точку \n2 - перейти к четвертому пункту \n> ', end='')
-        ch = int(input());
-        if ch == 1:
-            turning_point = np.array([[float(elem) for elem in input(f'Введите координаты точки: ').split(',')]])
-        elif ch == 2:
-            break
-        
 if __name__ == "__main__":
     main()
-    
