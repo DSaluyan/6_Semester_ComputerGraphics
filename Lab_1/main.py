@@ -3,10 +3,10 @@ from math import cos, sin, radians
 
 
 def amax(obj):
-    if isinstance(obj[0], list):
+    if isinstance(obj, list):
         return max([amax(sub_list) for sub_list in obj])
     else:
-        return max(obj)
+        return obj
 
 
 def my_dot(lhs, rhs):
