@@ -76,8 +76,11 @@ def main():
 
     # plotting again
     plot3d_contour(turned_points, ax)
+    plot3d_contour([[0, 0, 0], [max_coord, 0, 0]], ax, False)
+    plot3d_contour([[0, 0, 0], [0, max_coord, 0]], ax, False)
+    plot3d_contour([[0, 0, 0], [0, 0, max_coord]], ax, False)
     plt.title("Поворот фигуры")
-    ax.legend(['Исходная фигура', 'Повёрнутая фигура'])
+    ax.legend([ 'Исходная фигура', 'Повёрнутая фигура', 'Ось X', 'Ось Y', 'Ось Z'])
     ax.set_xlim3d([-max_coord, max_coord])
     ax.set_ylim3d([-max_coord, max_coord])
     ax.set_zlim3d([-max_coord, max_coord])
