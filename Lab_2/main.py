@@ -37,21 +37,18 @@ def drawBSpline(points, k: int, ax):
     n = N - 1  # n из материалов Moodle
     X = generateNodalVector(N, k)  # узловой вектор
     J = [[]]  # вектор коэффициентов
-    for i in range(0, N):  # начальные коэффициенты (по Moodle это J i,1(t))
+    for i in range(0, n + k):  # начальные коэффициенты (по Moodle это J i,1(t))
         J[0].append(Piecewise((1, (X[i] <= t) & (t < X[i + 1])), (0, True)))
-    for cur_k in range(1, k):  # реккурентное задание
+    for cur_k in range(0, k - 1):  # реккурентное задание (ТЕПЕРЬ ОШИБКА ЗДЕСЬ, А ВЫВОД РАБОТАЕТ)
         J.append([])  # задание следующих коэффициентов
-        for i in range(0, N - 1):  # надо добавить, что 0 / 0 = 0
-            J[cur_k].append(J[cur_k - 1][i] * (t - X[i]) / X[i + k - 1] +
-                            J[cur_k - 1][i + 1] * (X[i + k] - t) / (X[i + k] - X[i + 1]))
-            if J[cur_k][len(J[cur_k]) - 1] == nan:
-                J[cur_k][len(J[cur_k]) - 1] = 0
-        if X[N + k - 2] != 0:
-            J[cur_k].append(J[cur_k - 1][N - 1] * (t - X[N - 1]) / X[N + k - 2])
-        # обработка последнего отдельно
-        # здесь уже не существует J[cur_k - 1][i + 1]
-        else:
-            J[cur_k].append(0)
+        for i in range(0, len(J[cur_k]) - 1):
+            # print(cur_k + 1, i, "_______")
+            # print((t - X[i]) / X[i + cur_k - 1])
+            # print((X[i + cur_k] - t) / (X[i + cur_k] - X[i + 1]))
+            J[cur_k + 1].append(J[cur_k][i] * (t - X[i]) / X[i + cur_k - 1] +
+                                J[cur_k][i + 1] * (X[i + cur_k] - t) / (X[i + cur_k] - X[i + 1]))
+            if J[cur_k + 1][-1] == nan:
+                J[cur_k + 1][-1] = 0
     P = J[k - 1][0] * points[0]  # создание итоговой функции
     for i in range(1, N):
         P = P + J[k - 1][i] * points[i]
