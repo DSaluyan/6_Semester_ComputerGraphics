@@ -1,21 +1,8 @@
-"""
-Дорогой Даниил,
-
-Прежде чем задавать вопросы по тому, что я уже сделал, попробуй прочитать мои комментарии
-Если это не поможет, попробуй найти ответы на вопросы в https://docs.sympy.org/latest/index.html
-Если и это не поможет, то я сам в этом, наверно, не разбираюсь, ахвавзавхаз
-
-Лаба в зачаточном состоянии, но это точно тема 2 и вариант 9 (хотя мб и 10, если поймем, как с ним делать)
-Ещё не поздно поменять вариант, если это нам будет не под силу
-Все источники с инфой я кидал тебе в ЛС ВКонтакте
-
-gl hf
-"""
 import matplotlib.pyplot as plt
 from sympy import nan  # для проверки на NaN
 from sympy import Piecewise  # кусочная функция
 from sympy import Matrix  # матрицы из sympy
-from sympy import plot_parametric  # построение
+from numpy import linspace  # range для нецелых
 from sympy.abc import t  # t в качестве символьной переменной (чтобы не использовать symbols() или var())
 
 
@@ -45,7 +32,7 @@ def generateNodalVector(N, k):  # генерация узлового векто
     return return_list
 
 
-def drawBSpline(points, k):
+def drawBSpline(points, k: int, ax):
     N = len(points)  # количество точек
     n = N - 1  # n из материалов Moodle
     X = generateNodalVector(N, k)  # узловой вектор
@@ -59,14 +46,22 @@ def drawBSpline(points, k):
                             J[cur_k - 1][i + 1] * (X[i + k] - t) / (X[i + k] - X[i + 1]))
             if J[cur_k][len(J[cur_k]) - 1] == nan:
                 J[cur_k][len(J[cur_k]) - 1] = 0
-        J[cur_k].append(J[cur_k - 1][N - 1] * (t - X[N - 1]) / X[N + k - 2])  # обработка последнего отдельно, так как
+        if X[N + k - 2] != 0:
+            J[cur_k].append(J[cur_k - 1][N - 1] * (t - X[N - 1]) / X[N + k - 2])
+        # обработка последнего отдельно
         # здесь уже не существует J[cur_k - 1][i + 1]
+        else:
+            J[cur_k].append(0)
     P = J[k - 1][0] * points[0]  # создание итоговой функции
     for i in range(1, N):
         P = P + J[k - 1][i] * points[i]
-    # координата x - print(P.row(0))
-    # координата y - print(P.row(1))
-    plot_parametric((P.row(0), P.row(1)), (t, 0, n - k + 2))  # вывод, который не работает (ГЛАВНАЯ ПРОБЛЕМА)
+    x_func = P[0]
+    y_func = P[1]
+    spline_points = []
+    t_values = linspace(0, n - k + 2, 100)
+    for t_value in t_values[:-1]:
+        spline_points.append([x_func.subs(t, t_value), y_func.subs(t, t_value)])
+    plot_contour(spline_points, ax, contour=False)
 
 
 def main():
@@ -76,12 +71,12 @@ def main():
     # plotting
     plt.figure()
     ax = plt.axes()
-    plot_contour(points, ax)
+    plot_contour(points, ax, contour=False)
     if k != 0:
-        drawBSpline(points, k)
+        drawBSpline(points, k, ax)
     else:
         for i in range(1, len(points)):  # условно, надо сначала с одиночным случаем разобраться
-            drawBSpline(points, i)
+            drawBSpline(points, i, ax)
     plt.show()
 
 
