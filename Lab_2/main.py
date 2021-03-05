@@ -60,20 +60,20 @@ def drawBSpline(points, k: int, ax):
     N = len(points)  # количество точек
     n = N - 1  # n из материалов Moodle
     X = generateNodalVector(n, k)  # узловой вектор
-    print("X = ", X)
-    J = generateBasicFunctions(X, k)  # рекурсивное создание базисных функций (ПРОБЛЕМА ЗДЕСЬ)
-    print("Элементы J:")
-    for elem in J:
-        print(elem)
+    # print("X = ", X)
+    J = generateBasicFunctions(X, k)  # рекурсивное создание базисных функций (ПРОБЛЕМА НЕ ЗДЕСЬ)
+    # print("Элементы J:")
+    # for elem in J:
+    #     print(elem)
     P = J[0] * points[0]
     for i in range(1, N):  # создание итоговой функции
         P = P + J[i] * points[i]
     x_func = P[0]
     y_func = P[1]
     spline_points = []
-    t_values = linspace(0, n - k + 2, 100)
-    for t_value in t_values[:-1]:
-        print("Для t = ", t_value, " точка: ", [x_func.subs(t, t_value), y_func.subs(t, t_value)])
+    t_values = linspace(1, n - k + 1, 100)  # поиграться с отображением начальных/конечных точек
+    for t_value in t_values:
+        # print("Для t = ", t_value, " точка: ", [x_func.subs(t, t_value), y_func.subs(t, t_value)])
         spline_points.append([x_func.subs(t, t_value), y_func.subs(t, t_value)])
     plot_contour(spline_points, ax, contour=False)
 
@@ -82,6 +82,8 @@ def main():
     points = [Matrix([float(elem) for elem in input(f'Введите точку фигуры {i}: ').split(',')])
               for i in range(1, int(input('Введите количество точек: ')) + 1)]
     k = int(input('Введите порядок B-сплайна (0 до N-1): '))
+    # поиграться с копированием начальных/конечных точек
+    points = [points[0], *points, points[-1]]
     # plotting
     plt.figure()
     ax = plt.axes()
