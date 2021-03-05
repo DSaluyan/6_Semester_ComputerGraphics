@@ -2,12 +2,11 @@ import matplotlib.pyplot as plt
 from math import cos, sin, radians
 
 
-def max2d(obj):
-    result = max(obj[0])
-    for row in obj:
-        if max(row) > result:
-            result = max(row)
-    return result
+def amax(obj):
+    if isinstance(obj, list):
+        return max([amax(sub_list) for sub_list in obj])
+    else:
+        return obj
 
 
 def my_dot(lhs, rhs):
@@ -72,7 +71,7 @@ def main():
                      [sin(turn_z), cos(turn_z), 0],
                      [0, 0, 1]]
     turned_points = my_dot(my_dot(my_dot(points, turn_x_matrix), turn_y_matrix), turn_z_matrix)
-    max_coord = max(max2d(points), max2d(turned_points))
+    max_coord = amax([points, turned_points])
 
     # plotting again
     plot3d_contour(turned_points, ax)
@@ -80,10 +79,11 @@ def main():
     plot3d_contour([[0, 0, 0], [0, max_coord, 0]], ax, False)
     plot3d_contour([[0, 0, 0], [0, 0, max_coord]], ax, False)
     plt.title("Поворот фигуры")
-    ax.legend([ 'Исходная фигура', 'Повёрнутая фигура', 'Ось X', 'Ось Y', 'Ось Z'])
+    ax.legend(['Исходная фигура', 'Повёрнутая фигура', 'Ось X', 'Ось Y', 'Ось Z'])
     ax.set_xlim3d([-max_coord, max_coord])
     ax.set_ylim3d([-max_coord, max_coord])
     ax.set_zlim3d([-max_coord, max_coord])
+    ax.set_box_aspect([1, 1, 1])
     plt.show()
 
 

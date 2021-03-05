@@ -3,6 +3,8 @@ from sympy import Piecewise  # кусочная функция
 from sympy import Matrix  # матрицы из sympy
 from numpy import linspace  # range для нецелых
 from sympy.abc import t  # t в качестве символьной переменной (чтобы не использовать symbols() или var())
+
+
 def plot_contour(points, ax, contour=True, **params):  # из первой лабы, но без 3D
     if params is None:
         params = {}
@@ -14,6 +16,8 @@ def plot_contour(points, ax, contour=True, **params):  # из первой ла�
                 **params)
     else:
         ax.plot(x, y, **params)
+        
+        
 def generateNodalVector(n, k):  # генерация узлового вектора (это 100% правильно, но перепроверь)
     return_list = []
     for i in range(n + k + 1):
@@ -24,6 +28,8 @@ def generateNodalVector(n, k):  # генерация узлового векто
         else:
             return_list.append(n - k + 2)
     return return_list
+  
+  
 def generateBasicFunctions(X, k):
     J = []
     if k == 1:
@@ -41,11 +47,9 @@ def generateBasicFunctions(X, k):
             else:
                 tmp2 = J_previous[i + 1] * (X[i + k] - t) / (X[i + k] - X[i + 1])
             J.append(tmp1 + tmp2)
-            # 1. (ОСНОВНОЙ ВАРИАНТ) Вариант не с Moodle - выдаёт правильную середину при k = 3
-            # J.append(J_previous[i] * (t - X[i]) / (X[i + k - 1] - X[i]) +
-            #          J_previous[i + 1] * (X[i + k] - t) / (X[i + k] - X[i + 1]))
-
     return J
+  
+  
 def drawBSpline(points, k: int, ax):
     N = len(points)  # количество точек
     n = N - 1  # n из материалов Moodle
@@ -62,6 +66,7 @@ def drawBSpline(points, k: int, ax):
         spline_points.append([x_func.subs(t, t_value), y_func.subs(t, t_value)])
     plot_contour(spline_points, ax, contour=False)
 
+    
 def main():
     points = [Matrix([float(elem) for elem in input(f'Введите точку фигуры {i}: ').split(',')])
               for i in range(1, int(input('Введите количество точек: ')) + 1)]
@@ -73,5 +78,7 @@ def main():
     plot_contour(points, ax, contour=False)
     drawBSpline(points, k, ax)
     plt.show()
+    
+    
 if __name__ == "__main__":
     main()
