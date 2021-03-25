@@ -4,6 +4,7 @@ from sympy import Matrix  # матрицы из sympy
 from numpy import linspace  # генератор промежуточных точек
 from sympy.abc import t, u  # t, u в качестве символьной переменной (чтобы не использовать symbols() или var())
 import numpy as np
+from math import cos, sin, radians
 
 
 def amax(obj):
@@ -131,24 +132,39 @@ def main():
     ax = plt.axes(projection='3d')
     plot3d_wireframe(points, ax)
     drawBSplineSurface(points, m, n, ax)
-    # plt.title(f'Построение B-сплайна {k}-ого порядка')
-    # plt.legend(['Исходные точки', f'B-сплайн {k}-ого порядка'])
+
+    turn_x = radians(float(input('Введите угол поворота относительно оси Х в градусах: ')))
+    turn_y = radians(float(input('Введите угол поворота относительно оси Y в градусах: ')))
+    turn_x_matrix = [[1, 0, 0],
+                     [0, cos(turn_x), -sin(turn_x)],
+                     [0, sin(turn_x), cos(turn_x)]]
+    turn_y_matrix = [[cos(turn_y), 0, sin(turn_y)],
+                     [0, 1, 0],
+                     [-sin(turn_y), 0, cos(turn_y)]]
+    turned_points = [my_dot(my_dot(elem, turn_x_matrix), turn_y_matrix) for elem in points]
+    max_coord = amax([points, turned_points])
+    drawBSplineSurface(turned_points, m, n, ax)
+    ax.plot([0, max_coord], [0, 0], [0, 0])
+    ax.plot([0, 0], [0, max_coord], [0, 0])
+    ax.plot([0, 0], [0, 0], [0, max_coord])
+    plt.title(f'Построение B-сплайна {m}-{n} порядка')
+    plt.legend(['Ось X', 'Ось Y', 'Ось Z'])
     plt.show()
-    while True:
-        point_for_change = int(input('Введите 0 для выхода или номер точки для изменения её координат: '))
-        if point_for_change == 0:
-            break
-        else:
-            points[point_for_change - 1] = [float(elem)
-                                            for elem in
-                                            input(f'Введите точку фигуры {point_for_change}: ').split(',')]
-            plt.figure()
-            ax = plt.axes(projection='3d')
-            plot3d_surface(points, ax)
-            drawBSplineSurface(points, m, n, ax)
-            # plt.title(f'Построение B-сплайна {k}-ого порядка')
-            # plt.legend(['Исходные точки', f'B-сплайн {k}-ого порядка'])
-            plt.show()
+    # while True:
+    #     point_for_change = int(input('Введите 0 для выхода или номер точки для изменения её координат: '))
+    #     if point_for_change == 0:
+    #         break
+    #     else:
+    #         points[point_for_change - 1] = [float(elem)
+    #                                         for elem in
+    #                                         input(f'Введите точку фигуры {point_for_change}: ').split(',')]
+    #         plt.figure()
+    #         ax = plt.axes(projection='3d')
+    #         plot3d_surface(points, ax)
+    #         drawBSplineSurface(points, m, n, ax)
+    #         # plt.title(f'Построение B-сплайна {k}-ого порядка')
+    #         # plt.legend(['Исходные точки', f'B-сплайн {k}-ого порядка'])
+    #         plt.show()
 
 
 if __name__ == "__main__":
